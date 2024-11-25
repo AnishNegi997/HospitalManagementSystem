@@ -1,0 +1,43 @@
+name: Build and Package Maven Project
+
+on:
+  push:
+    branches:
+      - main # Run workflow when changes are pushed to the main branch
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Use the latest Ubuntu image
+
+    steps:
+      # Step 1: Checkout code from your GitHub repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Java and Maven
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      # Step 3: Cache Maven dependencies for faster builds
+      - name: Cache Maven Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven
+
+      # Step 4: Build the project using Maven
+      - name: Build with Maven
+        run: mvn clean package
+
+      # Step 5: Upload the built JAR file as an artifact (optional)
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: HospitalManagementSystem
+          path: target/HospitalManagementSystem-*.jar
